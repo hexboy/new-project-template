@@ -6,8 +6,9 @@ const fileinclude = require('gulp-file-include'),
 	babel = require('gulp-babel'),
 	concat = require('gulp-concat'),
 	sass = require('gulp-sass'),
+	cssmin = require('gulp-cssmin'),
 	minify = require('gulp-minify'),
-	cssmin = require('gulp-cssmin');
+	browserify = require('gulp-browserify');
 
 gulp.task('clean', function() {
 	return gulp
@@ -28,9 +29,10 @@ gulp.task('copy', function() {
 });
 
 gulp.task('js', function() {
-	return gulp.src([
+	gulp.src([
 		'./src/**/*.js',
-		'!./src/**/*.min.js'
+		'!./src/**/*.min.js',
+		'!./src/assets/js/global.js'
 	])
 		.pipe(sourcemaps.init())
 		.pipe(babel({
@@ -41,28 +43,11 @@ gulp.task('js', function() {
 		.pipe(gulp.dest('./dist/assets/js'));
 });
 
-gulp.task('sass', function() {
-	return gulp.src('./src/assets/sass/**/*.scss')
-		.pipe(sass().on('error', sass.logError))
-		.pipe(gulp.dest('./dist/assets/css'));
-});
-
-gulp.task('html', function() {
-	gulp.src([
-		'./src/*.html',
-		'!./src/*.inc.html'
-	])
-		.pipe(fileinclude({
-			prefix: '@@',
-			basepath: '@file'
-		}))
-		.pipe(gulp.dest('./dist'));
-});
-
 gulp.task('mini-js', function() {
-	return gulp.src([
+	gulp.src([
 		'./src/**/*.js',
-		'!./src/**/*.min.js'
+		'!./src/**/*.min.js',
+		'!./src/assets/js/global.js'
 	])
 		.pipe(babel({
 			presets: ['env']
@@ -77,6 +62,43 @@ gulp.task('mini-js', function() {
 		.pipe(gulp.dest('./dist/assets/js'));
 });
 
+gulp.task('jslibs', function() {
+
+	// load libraries
+	return gulp.src([
+		'./src/assets/js/global.js'
+	])
+		.pipe(browserify())
+		.pipe(babel({
+			presets: ['env']
+		}))
+		.pipe(minify({
+			ext: {
+				min: '.js'
+			},
+			noSource: true
+		}))
+		.pipe(gulp.dest('./dist/assets/js'));
+});
+
+gulp.task('html', function() {
+	gulp.src([
+		'./src/*.html',
+		'!./src/*.inc.html'
+	])
+		.pipe(fileinclude({
+			prefix: '@@',
+			basepath: '@file'
+		}))
+		.pipe(gulp.dest('./dist'));
+});
+
+gulp.task('sass', function() {
+	return gulp.src('./src/assets/sass/**/*.scss')
+		.pipe(sass().on('error', sass.logError))
+		.pipe(gulp.dest('./dist/assets/css'));
+});
+
 gulp.task('mini-sass', function() {
 	return gulp.src('./src/assets/sass/**/*.scss')
 		.pipe(sass().on('error', sass.logError))
@@ -84,19 +106,20 @@ gulp.task('mini-sass', function() {
 		.pipe(gulp.dest('./dist/assets/css'));
 });
 
+gulp.task('default', function() {
+	runSequence('clean', 'jslibs', 'copy', 'html', 'js', 'sass');
 
-gulp.task('default', ['clean', 'copy'], function() {
 	gulp.watch('./src/**/*.html', ['html']);
 	gulp.watch([
 		'./src/**/*.scss'
-		], ['sass']);
+	], ['sass']);
 	gulp.watch([
 		'./src/**/*.js'
-		], ['js']);
+	], ['js']);
 });
 
 gulp.task('build', function() {
-	runSequence('clean', 'copy', 'html', 'mini-js', 'mini-sass', function() {
+	runSequence('clean', 'copy', 'jslibs', 'html', 'mini-js', 'mini-sass', function() {
 		console.log('Build successfully');
 	});
 });
