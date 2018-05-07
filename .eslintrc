@@ -4,7 +4,12 @@
     "quotes": ["error", "single"],
     "space-in-parens": ["error", "never"],
     "space-after-keywords": "off",
-    "keyword-spacing": ["error", {"before": true,"after": true}]
+    "keyword-spacing": ["error", {
+      "before": true,
+      "after": true
+    }],
+    "eqeqeq": "off",
+    "max-statements": "off"
   },
   "globals": {
     "jQuery": true
@@ -12,7 +17,8 @@
   "env": {
     "browser": true,
     "node": true,
-    "es6": true
+    "es6": true,
+    "jquery": true
   },
   "parser": "babel-eslint",
   "parserOptions": {
