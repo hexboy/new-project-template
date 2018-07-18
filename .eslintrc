@@ -9,7 +9,10 @@
       "after": true
     }],
     "eqeqeq": "off",
-    "max-statements": "off"
+    "max-statements": "off",
+    "indent": ["error", "tab"],
+    "comma-dangle": ["error", "never"],
+    "no-undef": "off"
   },
   "globals": {
     "jQuery": true
