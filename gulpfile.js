@@ -21,7 +21,6 @@ gulp.task('copy', function () {
 		'src/*',
 		'src/**/fonts/**/*',
 		'src/**/{/js/**/*min.js,/img/**/*,/css/**/*.min.css}',
-		'src/**/*.php',
 		'!src/*.json'
 	])
 		.pipe(gulp.dest('dist'));
@@ -92,7 +91,7 @@ gulp.task('minify-js', function () {
 		.pipe(gulp.dest('rev/js'));
 });
 
-gulp.task('rev', function () {
+gulp.task('rev-collector', function () {
 	return gulp.src(['rev/**/*.json', 'src/**/*.php'])
 		.pipe(revCollector({
 			replaceReved: true,
@@ -107,32 +106,24 @@ gulp.task('rev', function () {
 		.pipe(gulp.dest('dist'));
 });
 
-gulp.task('clean-rev', function () {
+gulp.task('rev-clean', function () {
 	return del(['./rev']);
 });
 
 gulp.task('default', function () {
-	runSequence('clean', 'copy', 'js', 'css', 'rev', 'clean-rev', function () {
+	runSequence('clean', 'copy', 'js', 'css', 'rev-collector', 'rev-clean', function () {
 		console.log(chalk.black.bgCyan('Finished'));
 	});
 });
 
 gulp.task('build', function () {
-	runSequence('clean', 'copy', 'minify-js', 'minify-css', 'rev', 'clean-rev', function () {
+	runSequence('clean', 'copy', 'minify-js', 'minify-css', 'rev-collector', 'rev-clean', function () {
 		console.log(chalk.black.bgCyan('Finished'));
 	});
 });
 
 gulp.task('watch', ['default'], function() {
 	gulp.watch([
-		'./src/**/*.scss'
-	], ['css']);
-
-	gulp.watch([
-		'./src/**/*.js'
-	], ['js']);
-
-	gulp.watch([
-		'./src/**/*.php'
-	], ['copy']);
+		'./src/**/*'
+	], ['default']);
 });
